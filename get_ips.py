@@ -56,38 +56,34 @@ def get(cgx):
                 if element_name == None:
                     element_name = "no-name-element"
                 print("Checking " + element_name)
-                try:
-                    for interface in cgx.get.interfaces(site_id=site_id, element_id=element_id).cgx_content['items']:
-                        if interface["used_for"] != "none":
-                            try:
-                                ion_data = {}
-                                ion_data["Site_Name"] = site_name
-                                ion_data["ION_Name"] = element_name
-                                ion_data["Interface"] = interface["name"]
-                                ion_data["DHCP/Static"] = interface["ipv4_config"]["type"]
-                                ion_data["IP"] = None
-                                ion_data["Gateway"] = None
-                                ion_data["Dhcp_Relay"] = None
-                                if interface["dhcp_relay"]:
-                                    ion_data["Dhcp_Relay"] = interface["dhcp_relay"]
-                            
-                                if ion_data["DHCP/Static"] == "static":
-                                    if interface["ipv4_config"]["static_config"]:
-                                        ion_data["IP"] = interface["ipv4_config"]["static_config"]["address"]
-                                    if interface["ipv4_config"]["routes"]:
-                                        ion_data["Gateway"] = interface["ipv4_config"]["routes"][0]["via"]
-                                else:
-                                    resp = cgx.get.interfaces_status(site_id=site_id, element_id=element_id, interface_id=interface["id"]).cgx_content
-                                    if resp["ipv4_addresses"]:
-                                        ion_data["IP"] = resp["ipv4_addresses"][0]
-                                    if resp["routes"]:
-                                        ion_data["Gateway"] = resp["routes"][0]["via"]
+                for interface in cgx.get.interfaces(site_id=site_id, element_id=element_id).cgx_content['items']:
+                    if interface["used_for"] != "none":
+                        ion_data = {}
+                        ion_data["Site_Name"] = site_name
+                        ion_data["ION_Name"] = element_name
+                        ion_data["Interface"] = interface["name"]
+                        ion_data["DHCP/Static"] = None
+                        if interface["ipv4_config"]:
+                            ion_data["DHCP/Static"] = interface["ipv4_config"]["type"]
+                        ion_data["IP"] = None
+                        ion_data["Gateway"] = None
+                        ion_data["Dhcp_Relay"] = None
+                        if interface["dhcp_relay"]:
+                            ion_data["Dhcp_Relay"] = interface["dhcp_relay"]
+                    
+                        if ion_data["DHCP/Static"] == "static":
+                            if interface["ipv4_config"]["static_config"]:
+                                ion_data["IP"] = interface["ipv4_config"]["static_config"]["address"]
+                            if interface["ipv4_config"]["routes"]:
+                                ion_data["Gateway"] = interface["ipv4_config"]["routes"][0]["via"]
+                        else:
+                            resp = cgx.get.interfaces_status(site_id=site_id, element_id=element_id, interface_id=interface["id"]).cgx_content
+                            if resp["ipv4_addresses"]:
+                                ion_data["IP"] = resp["ipv4_addresses"][0]
+                            if resp["routes"]:
+                                ion_data["Gateway"] = resp["routes"][0]["via"]
 
-                                ion_list.append(ion_data)
-                            except:
-                                print("Failed to collect interface data on " + element_name + " interface " + interface["name"])
-                except:
-                    print("No interfaces on " + element_name + " to check")
+                        ion_list.append(ion_data)
         
     csv_columns = []        
     for key in (ion_list)[0]:
