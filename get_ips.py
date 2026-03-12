@@ -78,10 +78,13 @@ def get(cgx):
                                 ion_data["Gateway"] = interface["ipv4_config"]["routes"][0]["via"]
                         else:
                             resp = cgx.get.interfaces_status(site_id=site_id, element_id=element_id, interface_id=interface["id"]).cgx_content
-                            if resp["ipv4_addresses"]:
-                                ion_data["IP"] = resp["ipv4_addresses"][0]
-                            if resp["routes"]:
-                                ion_data["Gateway"] = resp["routes"][0]["via"]
+                            try:
+                                if resp["ipv4_addresses"]:
+                                    ion_data["IP"] = resp["ipv4_addresses"][0]
+                                if resp["routes"]:
+                                    ion_data["Gateway"] = resp["routes"][0]["via"]
+                            except:
+                                pass
 
                         ion_list.append(ion_data)
         
